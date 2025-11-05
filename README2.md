@@ -1,3 +1,4 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/README.md b/README.md
 index dda029a3446c9fc83c488b001646eb9e2fcbf94e..a45b0ab23c401d64d87d43ee41828c9433d8e1b4 100644
 --- a/README.md
@@ -35,3 +36,6 @@ index dda029a3446c9fc83c488b001646eb9e2fcbf94e..a45b0ab23c401d64d87d43ee41828c94
 +- `minsu`
 +
 +해당 아이디로 로그인하면 AI 분석 결과와 맞춤형 문제 리스트, 스냅샷 히스토리를 확인할 수 있습니다.
+ 
+EOF
+)
