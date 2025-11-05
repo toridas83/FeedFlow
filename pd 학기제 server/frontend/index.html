@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>맞춤형 수학 문제 플랫폼</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f4f6fb;
+        color: #1f2933;
+      }
+
+      header {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: white;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+      }
+
+      header h1 {
+        margin: 0 0 0.75rem;
+        font-size: 2rem;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: -40px auto 3rem;
+        padding: 0 1.5rem;
+      }
+
+      .card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.35rem;
+      }
+
+      form {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+        border: 1px solid #d0d7e2;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+      }
+
+      .grid {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(37, 99, 235, 0.1);
+        color: #1d4ed8;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+      }
+
+      ul {
+        padding-left: 1.1rem;
+      }
+
+      li + li {
+        margin-top: 0.5rem;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .error {
+        color: #dc2626;
+        margin-top: 0.75rem;
+      }
+
+      .snapshot-card {
+        border-left: 4px solid #7c3aed;
+        padding-left: 1rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.75rem;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0.6rem 0;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>무자각 기반 맞춤형 수학 문제 플랫폼</h1>
+      <p>LLM 진단과 학습 데이터를 활용해 학생별 문제와 리포트를 제공합니다.</p>
+    </header>
+
+    <main>
+      <section id="login-card" class="card">
+        <h2>사용자 로그인</h2>
+        <form id="login-form">
+          <input
+            id="username-input"
+            type="text"
+            placeholder="사용자 이름 (예: hana, minsu)"
+            required
+          />
+          <button type="submit">로그인</button>
+        </form>
+        <div id="login-error" class="error hidden"></div>
+      </section>
+
+      <section id="dashboard" class="hidden">
+        <div class="grid">
+          <article class="card">
+            <h2>학습자 정보</h2>
+            <p id="student-name" class="tag"></p>
+            <p id="student-grade"></p>
+            <h3>분석된 학습 특징</h3>
+            <ul id="feature-list"></ul>
+          </article>
+
+          <article class="card">
+            <h2>최신 진단 스냅샷</h2>
+            <div id="latest-snapshot" class="snapshot-card"></div>
+            <button id="refresh-snapshot">새 스냅샷 생성</button>
+          </article>
+        </div>
+
+        <article class="card">
+          <h2>맞춤형 문제 추천</h2>
+          <div>
+            <button data-problem-type="general">일반 문제</button>
+            <button data-problem-type="assignment">과제 문제</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>제목</th>
+                <th>난이도</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody id="problem-table"></tbody>
+          </table>
+        </article>
+
+        <article class="card">
+          <h2>스냅샷 히스토리</h2>
+          <ul id="snapshot-history"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById("login-form");
+      const usernameInput = document.getElementById("username-input");
+      const loginError = document.getElementById("login-error");
+      const dashboard = document.getElementById("dashboard");
+      const studentName = document.getElementById("student-name");
+      const studentGrade = document.getElementById("student-grade");
+      const featureList = document.getElementById("feature-list");
+      const latestSnapshot = document.getElementById("latest-snapshot");
+      const snapshotHistory = document.getElementById("snapshot-history");
+      const problemTable = document.getElementById("problem-table");
+      const refreshSnapshotBtn = document.getElementById("refresh-snapshot");
+
+      let currentUser = null;
+
+      async function callApi(path, options = {}) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "요청 중 오류가 발생했습니다.");
+        }
+
+        return response.json();
+      }
+
+      function renderFeatures(features) {
+        featureList.innerHTML = "";
+        Object.entries(features).forEach(([name, value]) => {
+          const li = document.createElement("li");
+          li.textContent = `${name} : ${(value * 100).toFixed(0)} 점`;
+          featureList.appendChild(li);
+        });
+      }
+
+      function renderSnapshot(target, snapshot) {
+        target.innerHTML = `
+          <p><strong>생성 시각:</strong> ${new Date(
+            snapshot.created_at
+          ).toLocaleString()}</p>
+          <p><strong>점수:</strong> ${snapshot.score}</p>
+          <p><strong>핵심 피드백:</strong> ${snapshot.summary}</p>
+        `;
+      }
+
+      function renderSnapshotHistory(history) {
+        snapshotHistory.innerHTML = "";
+        history.forEach((snapshot) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${new Date(snapshot.created_at).toLocaleString()}</strong> — ${snapshot.summary}`;
+          snapshotHistory.appendChild(li);
+        });
+      }
+
+      function renderProblems(problems) {
+        problemTable.innerHTML = "";
+        problems.forEach((problem) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${problem.title}</td>
+            <td>${problem.difficulty}</td>
+            <td>${problem.description}</td>
+          `;
+          problemTable.appendChild(row);
+        });
+      }
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        loginError.classList.add("hidden");
+
+        try {
+          const data = await callApi("/api/login", {
+            method: "POST",
+            body: JSON.stringify({ username: usernameInput.value.trim() }),
+          });
+
+          currentUser = data.user;
+          dashboard.classList.remove("hidden");
+
+          studentName.textContent = `${data.user.name} (${data.user.username})`;
+          studentGrade.textContent = `학년: ${data.user.grade}`;
+          renderFeatures(data.user.features);
+          renderSnapshot(latestSnapshot, data.latest_snapshot);
+
+          const { snapshots } = await callApi(
+            `/api/snapshots?username=${data.user.username}`
+          );
+          renderSnapshotHistory(snapshots);
+
+          const { problems } = await callApi("/api/problems?type=general");
+          renderProblems(problems);
+        } catch (error) {
+          loginError.textContent = error.message;
+          loginError.classList.remove("hidden");
+        }
+      });
+
+      refreshSnapshotBtn.addEventListener("click", async () => {
+        if (!currentUser) return;
+
+        const { snapshot } = await callApi("/api/snapshots", {
+          method: "POST",
+          body: JSON.stringify({ username: currentUser.username }),
+        });
+        renderSnapshot(latestSnapshot, snapshot);
+
+        const { snapshots } = await callApi(
+          `/api/snapshots?username=${currentUser.username}`
+        );
+        renderSnapshotHistory(snapshots);
+      });
+
+      document
+        .querySelectorAll("button[data-problem-type]")
+        .forEach((button) => {
+          button.addEventListener("click", async () => {
+            if (!currentUser) return;
+            const type = button.dataset.problemType;
+            const { problems } = await callApi(`/api/problems?type=${type}`);
+            renderProblems(problems);
+          });
+        });
+    </script>
+  </body>
+</html>
