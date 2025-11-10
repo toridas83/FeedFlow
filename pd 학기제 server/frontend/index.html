@@ -10,134 +10,38 @@
         font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
       }
-
-      body {
-        margin: 0;
-        background: #f4f6fb;
-        color: #1f2933;
-      }
-
+      body { margin: 0; background: #f4f6fb; color: #1f2933; }
       header {
         background: linear-gradient(135deg, #2563eb, #7c3aed);
-        color: white;
-        padding: 2.5rem 1.5rem;
-        text-align: center;
+        color: white; padding: 2.5rem 1.5rem; text-align: center;
         box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
       }
-
-      header h1 {
-        margin: 0 0 0.75rem;
-        font-size: 2rem;
-      }
-
-      main {
-        max-width: 1080px;
-        margin: -40px auto 3rem;
-        padding: 0 1.5rem;
-      }
-
+      header h1 { margin: 0 0 0.75rem; font-size: 2rem; }
+      main { max-width: 1080px; margin: -40px auto 3rem; padding: 0 1.5rem; }
       .card {
-        background: white;
-        border-radius: 18px;
-        padding: 1.75rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        background: white; border-radius: 18px; padding: 1.75rem;
+        margin-bottom: 1.5rem; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
       }
-
-      .card h2 {
-        margin-top: 0;
-        font-size: 1.35rem;
-      }
-
-      form {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      input[type="text"] {
-        flex: 1;
-        min-width: 200px;
-        border: 1px solid #d0d7e2;
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-      }
-
       button {
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.2s ease;
+        background: #2563eb; color: white; border: none; border-radius: 12px;
+        padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: transform 0.15s ease, box-shadow 0.2s ease;
       }
-
-      button:hover {
-        transform: translateY(-1px);
+      button:hover { transform: translateY(-1px);
         box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
       }
-
-      .grid {
-        display: grid;
-        gap: 1.25rem;
+      input[type="text"] {
+        flex: 1; min-width: 200px; border: 1px solid #d0d7e2;
+        border-radius: 12px; padding: 0.75rem 1rem; font-size: 1rem;
       }
-
-      @media (min-width: 900px) {
-        .grid {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        background: rgba(37, 99, 235, 0.1);
-        color: #1d4ed8;
-        padding: 0.35rem 0.65rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        margin-right: 0.5rem;
-      }
-
-      ul {
-        padding-left: 1.1rem;
-      }
-
-      li + li {
-        margin-top: 0.5rem;
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      .error {
-        color: #dc2626;
-        margin-top: 0.75rem;
-      }
-
-      .snapshot-card {
-        border-left: 4px solid #7c3aed;
-        padding-left: 1rem;
-      }
-
+      .hidden { display: none !important; }
+      .error { color: #dc2626; margin-top: 0.75rem; }
       table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 0.75rem;
+        width: 100%; border-collapse: collapse; margin-top: 0.75rem;
       }
-
-      th,
-      td {
-        border-bottom: 1px solid #e5e7eb;
-        padding: 0.6rem 0;
-        text-align: left;
-      }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 0.6rem 0; text-align: left; }
+      .tag { display: inline-flex; background: rgba(37,99,235,0.1); color:#1d4ed8;
+             padding:0.35rem 0.65rem; border-radius:999px; font-size:0.85rem; }
     </style>
   </head>
   <body>
@@ -147,38 +51,37 @@
     </header>
 
     <main>
+      <!-- ✅ 로그인 카드 -->
       <section id="login-card" class="card">
         <h2>사용자 로그인</h2>
         <form id="login-form">
-          <input
-            id="username-input"
-            type="text"
-            placeholder="사용자 이름 (예: hana, minsu)"
-            required
-          />
+          <input id="username-input" type="text" placeholder="사용자 이름 (예: hana, minsu)" required />
           <button type="submit">로그인</button>
         </form>
         <div id="login-error" class="error hidden"></div>
       </section>
 
+      <!-- ✅ 대시보드 -->
       <section id="dashboard" class="hidden">
-        <div class="grid">
-          <article class="card">
-            <h2>학습자 정보</h2>
-            <p id="student-name" class="tag"></p>
-            <p id="student-grade"></p>
-            <h3>분석된 학습 특징</h3>
-            <ul id="feature-list"></ul>
-          </article>
-
-          <article class="card">
-            <h2>최신 진단 스냅샷</h2>
-            <div id="latest-snapshot" class="snapshot-card"></div>
-            <button id="refresh-snapshot">새 스냅샷 생성</button>
-          </article>
+        <div style="text-align: right; margin-bottom: 10px;">
+          <button id="logout-btn" style="background:#7c3aed;">로그아웃</button>
         </div>
 
-        <article class="card">
+        <div class="card">
+          <h2>학습자 정보</h2>
+          <p id="student-name" class="tag"></p>
+          <p id="student-grade"></p>
+          <h3>분석된 학습 특징</h3>
+          <ul id="feature-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>최신 진단 스냅샷</h2>
+          <div id="latest-snapshot"></div>
+          <button id="refresh-snapshot">새 스냅샷 생성</button>
+        </div>
+
+        <div class="card">
           <h2>맞춤형 문제 추천</h2>
           <div>
             <button data-problem-type="general">일반 문제</button>
@@ -194,20 +97,45 @@
             </thead>
             <tbody id="problem-table"></tbody>
           </table>
-        </article>
+        </div>
 
-        <article class="card">
+        <div class="card">
           <h2>스냅샷 히스토리</h2>
           <ul id="snapshot-history"></ul>
-        </article>
+        </div>
+      </section>
+
+      <!-- ✅ 추가: 백엔드 로그 전송 카드 -->
+      <section class="card">
+        <h2>백엔드 로그 테스트</h2>
+        <p>단어를 입력하고 서버로 전송해보세요. Flask 콘솔에 출력됩니다.</p>
+        <input id="word-input" type="text" placeholder="예: hello" />
+        <button id="send-word">서버로 전송</button>
+        <p id="word-result"></p>
       </section>
     </main>
 
     <script>
+      const BASE_URL = "http://127.0.0.1:5000";
+
+      async function callApi(path, options = {}) {
+        const response = await fetch(BASE_URL + path, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "요청 중 오류가 발생했습니다.");
+        }
+        return response.json();
+      }
+
+      // ---- 변수 참조 ----
       const loginForm = document.getElementById("login-form");
       const usernameInput = document.getElementById("username-input");
       const loginError = document.getElementById("login-error");
       const dashboard = document.getElementById("dashboard");
+      const loginCard = document.getElementById("login-card");
       const studentName = document.getElementById("student-name");
       const studentGrade = document.getElementById("student-grade");
       const featureList = document.getElementById("feature-list");
@@ -215,37 +143,26 @@
       const snapshotHistory = document.getElementById("snapshot-history");
       const problemTable = document.getElementById("problem-table");
       const refreshSnapshotBtn = document.getElementById("refresh-snapshot");
+      const logoutBtn = document.getElementById("logout-btn");
+      const sendWordBtn = document.getElementById("send-word");
+      const wordInput = document.getElementById("word-input");
+      const wordResult = document.getElementById("word-result");
 
       let currentUser = null;
 
-      async function callApi(path, options = {}) {
-        const response = await fetch(path, {
-          headers: { "Content-Type": "application/json" },
-          ...options,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || "요청 중 오류가 발생했습니다.");
-        }
-
-        return response.json();
-      }
-
+      // ---- 렌더링 유틸 ----
       function renderFeatures(features) {
         featureList.innerHTML = "";
         Object.entries(features).forEach(([name, value]) => {
           const li = document.createElement("li");
-          li.textContent = `${name} : ${(value * 100).toFixed(0)} 점`;
+          li.textContent = `${name}: ${(value * 100).toFixed(0)} 점`;
           featureList.appendChild(li);
         });
       }
 
       function renderSnapshot(target, snapshot) {
         target.innerHTML = `
-          <p><strong>생성 시각:</strong> ${new Date(
-            snapshot.created_at
-          ).toLocaleString()}</p>
+          <p><strong>생성 시각:</strong> ${new Date(snapshot.created_at).toLocaleString()}</p>
           <p><strong>점수:</strong> ${snapshot.score}</p>
           <p><strong>핵심 피드백:</strong> ${snapshot.summary}</p>
         `;
@@ -253,28 +170,25 @@
 
       function renderSnapshotHistory(history) {
         snapshotHistory.innerHTML = "";
-        history.forEach((snapshot) => {
+        history.forEach((snap) => {
           const li = document.createElement("li");
-          li.innerHTML = `<strong>${new Date(snapshot.created_at).toLocaleString()}</strong> — ${snapshot.summary}`;
+          li.textContent = `${new Date(snap.created_at).toLocaleString()} - ${snap.summary}`;
           snapshotHistory.appendChild(li);
         });
       }
 
       function renderProblems(problems) {
         problemTable.innerHTML = "";
-        problems.forEach((problem) => {
+        problems.forEach((p) => {
           const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${problem.title}</td>
-            <td>${problem.difficulty}</td>
-            <td>${problem.description}</td>
-          `;
+          row.innerHTML = `<td>${p.title}</td><td>${p.difficulty}</td><td>${p.description}</td>`;
           problemTable.appendChild(row);
         });
       }
 
-      loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
+      // ---- 로그인 ----
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
         loginError.classList.add("hidden");
 
         try {
@@ -285,50 +199,121 @@
 
           currentUser = data.user;
           dashboard.classList.remove("hidden");
+          loginCard.classList.add("hidden");
 
           studentName.textContent = `${data.user.name} (${data.user.username})`;
           studentGrade.textContent = `학년: ${data.user.grade}`;
           renderFeatures(data.user.features);
           renderSnapshot(latestSnapshot, data.latest_snapshot);
 
-          const { snapshots } = await callApi(
-            `/api/snapshots?username=${data.user.username}`
-          );
+          const { snapshots } = await callApi(`/api/snapshots?username=${data.user.username}`);
           renderSnapshotHistory(snapshots);
 
           const { problems } = await callApi("/api/problems?type=general");
           renderProblems(problems);
-        } catch (error) {
-          loginError.textContent = error.message;
+        } catch (err) {
+          loginError.textContent = err.message;
           loginError.classList.remove("hidden");
         }
       });
 
+      // ---- 로그아웃 ----
+      logoutBtn.addEventListener("click", () => {
+        currentUser = null;
+        dashboard.classList.add("hidden");
+        loginCard.classList.remove("hidden");
+        usernameInput.value = "";
+      });
+
+      // ---- 스냅샷 새로고침 ----
       refreshSnapshotBtn.addEventListener("click", async () => {
         if (!currentUser) return;
-
         const { snapshot } = await callApi("/api/snapshots", {
           method: "POST",
           body: JSON.stringify({ username: currentUser.username }),
         });
         renderSnapshot(latestSnapshot, snapshot);
-
-        const { snapshots } = await callApi(
-          `/api/snapshots?username=${currentUser.username}`
-        );
+        const { snapshots } = await callApi(`/api/snapshots?username=${currentUser.username}`);
         renderSnapshotHistory(snapshots);
       });
 
-      document
-        .querySelectorAll("button[data-problem-type]")
-        .forEach((button) => {
-          button.addEventListener("click", async () => {
-            if (!currentUser) return;
-            const type = button.dataset.problemType;
-            const { problems } = await callApi(`/api/problems?type=${type}`);
-            renderProblems(problems);
-          });
+      // ---- 문제 유형 버튼 ----
+      document.querySelectorAll("button[data-problem-type]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!currentUser) return;
+          const type = btn.dataset.problemType;
+          const { problems } = await callApi(`/api/problems?type=${type}`);
+          renderProblems(problems);
         });
+      });
+
+      // ---- 간단한 문제 풀이 ----
+      problemTable.addEventListener("click", (e) => {
+        const row = e.target.closest("tr");
+        if (!row) return;
+
+        const title = row.children[0].textContent;
+        const description = row.children[2].textContent;
+
+        const existing = row.nextElementSibling;
+        if (existing && existing.classList.contains("answer-box")) {
+          existing.remove(); // 이미 열려있으면 닫기
+          return;
+        }
+
+        const answerBox = document.createElement("tr");
+        answerBox.classList.add("answer-box");
+        answerBox.innerHTML = `
+          <td colspan="3">
+            <div style="margin-top:0.75rem; border-top:1px solid #ddd; padding-top:1rem;">
+              <p><strong>문제:</strong> ${description}</p>
+              <input id="user-answer" type="text" placeholder="정답 입력" style="padding:0.5rem; border-radius:8px; border:1px solid #ccc;" />
+              <button id="check-answer" style="margin-left:8px;">정답 확인</button>
+              <p id="answer-result" style="margin-top:0.5rem;"></p>
+            </div>
+          </td>
+        `;
+        row.after(answerBox);
+
+        const checkBtn = answerBox.querySelector("#check-answer");
+        const resultText = answerBox.querySelector("#answer-result");
+        checkBtn.addEventListener("click", () => {
+          const ans = answerBox.querySelector("#user-answer").value.trim();
+          const correctAnswers = {
+            "분수의 덧셈": "19/15",
+            "일차방정식": "6",
+            "피타고라스 정리": "13",
+          };
+          const correct = correctAnswers[title];
+          if (!correct) {
+            resultText.textContent = "정답 데이터 없음.";
+            return;
+          }
+          resultText.textContent = ans === correct ? "✅ 정답입니다!" : `❌ 오답! (정답: ${correct})`;
+        });
+      });
+
+      // ---- 백엔드 로그 테스트 ----
+      sendWordBtn.addEventListener("click", async () => {
+        const word = wordInput.value.trim();
+        if (!word) {
+          wordResult.textContent = "단어를 입력해주세요.";
+          return;
+        }
+        wordResult.textContent = "서버로 전송 중...";
+        try {
+          const res = await fetch(BASE_URL + "/api/word", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ word }),
+          });
+          if (!res.ok) throw new Error("요청 실패");
+          const data = await res.json();
+          wordResult.textContent = data.reply;
+        } catch (err) {
+          wordResult.textContent = "에러: " + err.message;
+        }
+      });
     </script>
   </body>
 </html>
