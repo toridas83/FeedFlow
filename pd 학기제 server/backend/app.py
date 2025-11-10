@@ -10,9 +10,8 @@ from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
-# ---------------------------------------------------------------------------
+
 # In-memory storage used for the prototype.
-# ---------------------------------------------------------------------------
 USERS: Dict[str, dict] = {
     "hana": {
         "name": "Hana Kim",
@@ -57,6 +56,7 @@ PROBLEM_BANK: Dict[str, List[dict]] = {
             "difficulty": "상",
         },
     ],
+
 }
 
 SNAPSHOT_HISTORY: Dict[str, List[dict]] = {
@@ -65,14 +65,10 @@ SNAPSHOT_HISTORY: Dict[str, List[dict]] = {
 }
 
 
-# ---------------------------------------------------------------------------
 # Helper utilities
-# ---------------------------------------------------------------------------
 def _generate_snapshot(username: str) -> dict:
     user = USERS[username]
-    weaknesses = [
-        "계산 정확도", "도형 이해", "함수 개념", "식 세우기", "문제 풀이 전략"
-    ]
+    weaknesses = ["계산 정확도", "도형 이해", "함수 개념", "식 세우기", "문제 풀이 전략"]
     focus_area = random.choice(weaknesses)
     created_at = datetime.utcnow().isoformat() + "Z"
     score = round(random.uniform(60, 95), 1)
@@ -88,9 +84,7 @@ def _generate_snapshot(username: str) -> dict:
     return snapshot
 
 
-# ---------------------------------------------------------------------------
 # Routes
-# ---------------------------------------------------------------------------
 @app.route("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
@@ -105,10 +99,8 @@ def login():
         return jsonify({"error": "존재하지 않는 사용자입니다."}), 404
 
     user = USERS[username]
-    # In a real system this would be a signed token.
     fake_token = f"token-{username}"
 
-    # Return the latest snapshot or generate one lazily.
     history = SNAPSHOT_HISTORY[username]
     if not history:
         history.append(_generate_snapshot(username))
@@ -171,5 +163,29 @@ def get_settings():
     )
 
 
+# 추가: Frontend → Backend 로그 전송 엔드포인트
+@app.route("/api/word", methods=["POST", "OPTIONS"])
+def receive_word():
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    payload = request.get_json(silent=True) or {}
+    word = payload.get("word")
+
+    if not word:
+        return jsonify(error="Please include a word in the request body."), 400
+
+    print(f"[LOG] Received word from frontend: {word}")
+    return jsonify(reply=f"Backend received: {word}")
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)
