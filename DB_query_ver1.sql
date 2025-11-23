@@ -1,5 +1,11 @@
+DROP DATABASE math_platform_db;
+CREATE DATABASE math_platform_db;  -- 서버 실행 전 DB 청소
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0; -- 테이블 삭제/생성 순서로 인한 오류 방지
+
+CREATE DATABASE IF NOT EXISTS math_platform_db; 
+USE math_platform_db; 
 
 -- ==========================================
 -- 1. MEMBER (회원 테이블)
