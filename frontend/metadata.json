@@ -1,0 +1,5 @@
+{
+  "name": "FeedFlow",
+  "description": "무자각 기반의 맞춤형 수학 문제 생성 및 진단 플랫폼 FeedFlow입니다.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum SolveResult {
+  in_progress
+  correct
+  incorrect
+  gave_up
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String?
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  grade        String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  problemSets  ProblemSet[]
+  solveAttempts SolveAttempt[]
+  problemFeatures ProblemFeature[]
+  problems     Problem[]
+  generationPlans SetGenerationPlan[]
+
+  @@map("users")
+}
+
+model ProblemSet {
+  id                  String          @id @default(cuid())
+  userId              String          @map("user_id")
+  title               String
+  description         String?
+  tags                String?
+  diagnosisText       String?         @map("diagnosis_text") @db.Text
+  diagnosisCreatedAt  DateTime?       @map("diagnosis_created_at")
+  status              String?
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  user                User            @relation(fields: [userId], references: [id])
+  problems            Problem[]
+  solveAttempts       SolveAttempt[]
+  problemFeatures     ProblemFeature[]
+  generationPlan      SetGenerationPlan?
+
+  @@index([userId])
+  @@map("problem_sets")
+}
+
+model Problem {
+  id            String         @id @default(cuid())
+  problemSetId  String         @map("problem_set_id")
+  userId        String?        @map("user_id")
+  content       String         @db.Text
+  // 제목/주제/답 등 길어질 수 있는 필드들은 Text로 보관
+  questionTopic String?        @map("question_topic_name") @db.Text
+  answer        String         @db.Text
+  solution      String?        @map("solution") @db.Text
+  proceduralHint String?       @map("procedural_hint") @db.Text
+  learningStage String?        @map("learning_stage")
+  evaluationArea String?       @map("evaluation_area")
+  contentArea   String?        @map("content_area")
+  difficulty    String?
+  grade         String?
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  user          User?          @relation(fields: [userId], references: [id])
+  problemSet    ProblemSet     @relation(fields: [problemSetId], references: [id])
+  solveAttempts SolveAttempt[]
+  problemFeatures ProblemFeature[]
+
+  @@index([problemSetId])
+  @@map("problems")
+}
+
+/// solve_attempts: 문제풀이 시도의 본문 로그(한 문제를 한 번 푼 기록)
+model SolveAttempt {
+  id              String       @id @default(cuid())
+  userId          String       @map("user_id")
+  problemId       String       @map("problem_id")
+  problemSetId    String       @map("problem_set_id")
+  startedAt       DateTime     @map("started_at")
+  firstInputAt    DateTime?    @map("first_input_at")
+  submittedAt     DateTime?    @map("submitted_at")
+  result          SolveResult  @default(in_progress)
+  attemptCount    Int          @map("attempt_count")
+  expectedScore   Float?       @map("expected_score")
+  selfConfidence  Float?       @map("self_confidence")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  user            User         @relation(fields: [userId], references: [id])
+  problem         Problem      @relation(fields: [problemId], references: [id])
+  problemSet      ProblemSet   @relation(fields: [problemSetId], references: [id])
+  solveSteps      SolveStep[]
+  problemFeatures ProblemFeature[]
+  solveEvents     SolveEvent[]
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([problemSetId])
+  @@index([result])
+  @@map("solve_attempts")
+}
+
+/// solve_steps: 풀이 과정 단계별 로그(한 줄/블록 단위)
+model SolveStep {
+  id            String        @id @default(cuid())
+  solveAttemptId String       @map("solve_attempt_id")
+  stepIndex     Int           @map("step_index")
+  content       String
+  isDeleted     Boolean       @default(false) @map("is_deleted")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  solveAttempt  SolveAttempt  @relation(fields: [solveAttemptId], references: [id])
+
+  @@index([solveAttemptId])
+  @@index([stepIndex])
+  @@unique([solveAttemptId, stepIndex])
+  @@map("solve_steps")
+}
+
+/// problem_features: solve_attempts 기반 feature 30개 결과 저장
+model ProblemFeature {
+  id             String      @id @default(cuid())
+  userId         String      @map("user_id")
+  problemId      String      @map("problem_id")
+  problemSetId   String      @map("problem_set_id")
+  solveAttemptId String      @map("solve_attempt_id")
+  f1             Float?
+  f2             Float?
+  f3             Float?
+  f4             Float?
+  f5             Float?
+  f6             Float?
+  f7             Float?
+  f8             Float?
+  f9             Float?
+  f10            Float?
+  f11            Float?
+  f12            Float?
+  f13            Float?
+  f14            Float?
+  f15            Float?
+  f16            Float?
+  f17            Float?
+  f18            Float?
+  f19            Float?
+  f20            Float?
+  f21            Float?
+  f22            Float?
+  f23            Float?
+  f24            Float?
+  f25            Float?
+  f26            Float?
+  f27            Float?
+  f28            Float?
+  f29            Float?
+  f30            Float?
+  modelVersion   String       @map("model_version")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  solveAttempt   SolveAttempt @relation(fields: [solveAttemptId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+  problem        Problem      @relation(fields: [problemId], references: [id])
+  problemSet     ProblemSet   @relation(fields: [problemSetId], references: [id])
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([problemSetId])
+  @@index([solveAttemptId])
+  @@unique([solveAttemptId])
+  @@map("problem_features")
+}
+
+/// 세트별 다음 문제 구성 계획 저장
+model SetGenerationPlan {
+  id            String       @id @default(cuid())
+  problemSetId  String       @map("problem_set_id")
+  userId        String?      @map("user_id")
+  planJson      Json         @map("plan_json")
+  source        String?      @map("source")
+  applied       Boolean      @default(false) @map("applied")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  problemSet    ProblemSet   @relation(fields: [problemSetId], references: [id], onDelete: Cascade)
+  user          User?        @relation(fields: [userId], references: [id])
+
+  @@unique([problemSetId])
+  @@map("set_generation_plans")
+}
+
+/// solve_events: 풀이 중 발생하는 세부 이벤트 로그
+model SolveEvent {
+  id               String        @id @default(cuid())
+  solveAttemptId   String        @map("solve_attempt_id")
+  stepIndex        Int?          @map("step_index")
+  eventType        String        @map("event_type")
+  payloadJson      Json?         @map("payload_json")
+  clientTimestamp  DateTime?     @map("client_timestamp")
+  serverTimestamp  DateTime      @default(now()) @map("server_timestamp")
+  solveAttempt     SolveAttempt  @relation(fields: [solveAttemptId], references: [id])
+
+  @@index([solveAttemptId])
+  @@index([eventType])
+  @@index([stepIndex])
+  @@map("solve_events")
+}
