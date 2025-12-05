@@ -81,6 +81,7 @@ export const ProblemSolver: React.FC = () => {
   
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const initializedRef = useRef<boolean>(false);
 
   // Derived state for the active step content
   const activeStep = steps.find(s => s.id === focusedStepId);
@@ -91,12 +92,38 @@ export const ProblemSolver: React.FC = () => {
     return raw.replace(/\s*(①|②|③|④|⑤)/g, '<br>$1');
   };
 
+  // 단계별 풀이 렌더링용: 수식 구분자가 없으면 전체를 $...$로 감싼다.
+  const asMath = (raw: string) => {
+    if (!raw) return '';
+    const hasDelim = /(\$|\\\(|\\\[)/.test(raw);
+    return hasDelim ? raw : `$${raw}$`;
+  };
+
+  // 최종 제출/포기 시 예상 점수를 요청
+  const requestExpectedScore = (): number | undefined => {
+    let finalScore = expectedScore;
+    if (finalScore === '' || isNaN(Number(finalScore))) {
+      const v = window.prompt('모든 문항을 마쳤습니다. 예상 점수(0~100)를 입력해주세요.', '');
+      if (v === null) return undefined;
+      const n = Number(v);
+      if (Number.isNaN(n) || n < 0 || n > 100) {
+        alert('0~100 사이의 숫자를 입력해주세요.');
+        return undefined;
+      }
+      setExpectedScore(n);
+      finalScore = n;
+    }
+    return Number(finalScore);
+  };
+
   // --- Initialization & Data Fetching ---
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     loadExistingProblems();
   }, [user, navigate]);
 
@@ -108,7 +135,7 @@ export const ProblemSolver: React.FC = () => {
       setProblemSetId(res.problemSetId);
       setProblems(res.problems || []);
       setCurrentProblemIndex(1);
-      prepareProblem(res.problems?.[0] || null);
+      prepareProblem(res.problems?.[0] || null, res.problemSetId);
     } catch (err) {
       console.error(err);
       alert('문제를 불러오지 못했습니다.');
@@ -117,7 +144,7 @@ export const ProblemSolver: React.FC = () => {
     }
   };
 
-  const prepareProblem = async (data: Problem | null) => {
+  const prepareProblem = async (data: Problem | null, setIdOverride?: string) => {
     if (!data) {
       setProblem(null);
       return;
@@ -131,11 +158,12 @@ export const ProblemSolver: React.FC = () => {
     setShowConceptHint(false);
     setShowProcedureHint(false);
     startTimeRef.current = Date.now();
-    if (user && problemSetId) {
+    const targetSetId = setIdOverride || problemSetId;
+    if (user && targetSetId) {
       const attempt = await api.startAttempt({
         userId: user.id,
         problemId: data.id,
-        problemSetId,
+        problemSetId: targetSetId,
         problem: {
           title: data.title,
           description: data.description,
@@ -208,9 +236,20 @@ export const ProblemSolver: React.FC = () => {
   const handleFocusIn = () => {
     if (isFocused) return;
     setIsFocused(true);
+    const nowIso = new Date().toISOString();
+    if (!firstInputRef.current) {
+      firstInputRef.current = nowIso;
+      if (attemptIdRef.current) {
+        api.logAttemptEvents(attemptIdRef.current, [
+          { eventType: 'FIRST_INPUT', clientTimestamp: nowIso },
+          { eventType: 'FOCUS_IN', clientTimestamp: nowIso },
+        ]);
+        return;
+      }
+    }
     if (attemptIdRef.current) {
       api.logAttemptEvents(attemptIdRef.current, [
-        { eventType: 'FOCUS_IN', clientTimestamp: new Date().toISOString() },
+        { eventType: 'FOCUS_IN', clientTimestamp: nowIso },
       ]);
     }
   };
@@ -282,23 +321,12 @@ export const ProblemSolver: React.FC = () => {
       let finalExpectedForSubmit: number | undefined = undefined;
       // 최종 제출 시 예상 점수 입력 유도
       if (isFinal) {
-        let finalScore = expectedScore;
-        if (finalScore === '' || isNaN(Number(finalScore))) {
-          const v = window.prompt('모든 문항을 마쳤습니다. 예상 점수(0~100)를 입력해주세요.', '');
-          if (v === null) {
-            setSubmitting(false);
-            return;
-          }
-          const n = Number(v);
-          if (Number.isNaN(n) || n < 0 || n > 100) {
-            alert('0~100 사이의 숫자를 입력해주세요.');
-            setSubmitting(false);
-            return;
-          }
-          setExpectedScore(n);
-          finalScore = n;
+        const val = requestExpectedScore();
+        if (val === undefined) {
+          setSubmitting(false);
+          return;
         }
-        finalExpectedForSubmit = Number(finalScore);
+        finalExpectedForSubmit = val;
       }
 
       // persist steps and events to backend
@@ -339,7 +367,7 @@ export const ProblemSolver: React.FC = () => {
       if (currentProblemIndex < (problems.length || TOTAL_PROBLEMS)) {
         const nextIdx = currentProblemIndex + 1;
         setCurrentProblemIndex(nextIdx);
-        await prepareProblem(problems[nextIdx - 1]);
+        await prepareProblem(problems[nextIdx - 1], problemSetId);
         window.scrollTo(0, 0);
       } else {
         setAnalyzing(true);
@@ -364,25 +392,60 @@ export const ProblemSolver: React.FC = () => {
   const handleGiveUp = async () => {
     setSubmitting(true);
     try {
+      const isFinal = currentProblemIndex >= (problems.length || TOTAL_PROBLEMS);
+      let finalExpectedForSubmit: number | undefined = undefined;
+      if (isFinal) {
+        const val = requestExpectedScore();
+        if (val === undefined) {
+          setSubmitting(false);
+          return;
+        }
+        finalExpectedForSubmit = val;
+      }
+
+      // 현재까지 단계/이벤트를 저장
       if (attemptIdRef.current) {
+        await api.saveAttemptSteps(attemptIdRef.current, steps.map((s, idx) => ({
+          stepIndex: idx,
+          content: s.content,
+          isDeleted: false,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt,
+        })));
         await api.logAttemptEvents(attemptIdRef.current, [
           { eventType: 'GIVE_UP', clientTimestamp: new Date().toISOString() },
+          { eventType: 'EVAL_RESULT', clientTimestamp: new Date().toISOString(), payload: { selectedOption } },
         ]);
         await api.submitAttempt(attemptIdRef.current, {
           result: 'gave_up',
           submittedAt: new Date().toISOString(),
           firstInputAt: firstInputRef.current || undefined,
-          expectedScore: expectedScore === '' ? undefined : Number(expectedScore),
+          expectedScore: isFinal ? finalExpectedForSubmit : undefined,
           selfConfidence: selfConfidence === '' ? undefined : Number(selfConfidence),
         });
+        await api.processAttempt(attemptIdRef.current);
       }
+
       // 다음 문제로 이동
       if (currentProblemIndex < (problems.length || TOTAL_PROBLEMS)) {
         const nextIdx = currentProblemIndex + 1;
         setCurrentProblemIndex(nextIdx);
-        await prepareProblem(problems[nextIdx - 1]);
+        await prepareProblem(problems[nextIdx - 1], problemSetId);
         window.scrollTo(0, 0);
       } else {
+        // 마지막 문항 포기: feature/report 처리까지 실행
+        if (problemSetId) {
+          setAnalyzing(true);
+          try {
+            const res = await api.processProblemSetFeatures(problemSetId);
+            navigate(`/snapshots/${res?.problemSetId || problemSetId}`);
+            return;
+          } catch (e) {
+            console.error('feature/report processing failed', e);
+          } finally {
+            setAnalyzing(false);
+          }
+        }
         navigate('/dashboard');
       }
     } catch (err) {
@@ -548,11 +611,13 @@ export const ProblemSolver: React.FC = () => {
                         
                         {/* Rendered Content View (No Input) */}
                         <div className="flex-grow p-5 min-h-[80px] flex items-center">
-                            <div className="text-gray-900 whitespace-pre-wrap break-words">
-                              {step.content && step.content.trim().length > 0
-                                ? step.content
-                                : `${index + 1}단계 풀이가 비어있습니다. 선택 후 우측에서 작성해주세요.`}
-                            </div>
+                            {step.content && step.content.trim().length > 0 ? (
+                              <MathIframeRenderer content={asMath(step.content)} height={140} />
+                            ) : (
+                              <div className="text-gray-500">
+                                {`${index + 1}단계 풀이가 비어있습니다. 선택 후 우측에서 작성해주세요.`}
+                              </div>
+                            )}
                         </div>
 
                         {/* Delete Button */}

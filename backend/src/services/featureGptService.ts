@@ -104,7 +104,9 @@ function mapFeatures(values: Record<string, number>) {
   const mapped: any = {};
   Object.entries(values).forEach(([key, val]) => {
     const k = key.startsWith('f') ? key : `f${key}`;
-    mapped[k as keyof typeof mapped] = val;
+    // 안전장치: 0~1 범위로 클램프
+    const num = Number(val);
+    mapped[k as keyof typeof mapped] = Number.isFinite(num) ? Math.min(1, Math.max(0, num)) : null;
   });
   return mapped;
 }

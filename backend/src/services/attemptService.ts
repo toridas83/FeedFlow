@@ -61,8 +61,7 @@ export async function startAttempt(input: StartAttemptInput) {
     }
   } else {
     // Create new problem with provided values; 빈 값은 공백 처리
-    await prisma.problem.update({
-      where: { id: input.problemId },
+    await prisma.problem.create({
       data: {
         id: input.problemId,
         problemSet: { connect: { id: problemSetId } },

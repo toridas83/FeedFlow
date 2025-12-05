@@ -3,6 +3,7 @@ import { computeGptFeaturesForProblemSet } from '../services/featureGptService';
 import { generateDiagnosticReport } from '../services/reportService';
 import { prisma } from '../models/prisma';
 import { buildAdaptivePlan } from '../services/problemGenerationService';
+import { aggregateSetFeatures } from '../services/featureExtractionService';
 
 export async function processProblemSetFeatures(req: Request, res: Response) {
   try {
@@ -31,8 +32,11 @@ export async function processProblemSetFeatures(req: Request, res: Response) {
       },
     });
 
-    // 2) 피처 추출 → 3) 진단 리포트 생성
+    // 2) 피처 추출(LLM 기반 포함) → 세트 단위 집계 순으로 실행
     await computeGptFeaturesForProblemSet(id);
+    await aggregateSetFeatures(id);
+
+    // 3) 진단 리포트 생성
     await generateDiagnosticReport(id);
     return res.json({ ok: true, problemSetId: id });
   } catch (err) {

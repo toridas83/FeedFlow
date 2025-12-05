@@ -27,7 +27,8 @@ export async function generateDiagnosticReport(problemSetId: string) {
   // 문제/시도/피처 수집
   const problems = await prisma.problem.findMany({ where: { problemSetId }, orderBy: { createdAt: 'asc' } });
   const attempts = await prisma.solveAttempt.findMany({ where: { problemSetId }, orderBy: { startedAt: 'asc' } });
-  const features = await prisma.problemFeature.findMany({ where: { problemSetId } });
+  // 세트 단위 피처만 사용 (집계/역변환 완료된 값)
+  const features = await prisma.problemFeature.findMany({ where: { problemSetId, scope: 'set' } });
   const set = await prisma.problemSet.findUnique({ where: { id: problemSetId }, include: { user: true } });
 
   const featureScores = aggregateFeatureScores(features);
@@ -78,22 +79,16 @@ export async function generateDiagnosticReport(problemSetId: string) {
 }
 
 function aggregateFeatureScores(features: any[]) {
-  const acc: Record<string, { sum: number; count: number }> = {};
-  features.forEach((f) => {
-    for (let i = 1; i <= 30; i++) {
-      const key = `f${i}`;
-      const val = f[key];
-      if (val === null || val === undefined) continue;
-      if (!acc[key]) acc[key] = { sum: 0, count: 0 };
-      acc[key].sum += Number(val);
-      acc[key].count += 1;
-    }
-  });
   const result: Record<number, number> = {};
-  Object.entries(acc).forEach(([k, v]) => {
-    const fid = Number(k.slice(1));
-    result[fid] = v.sum / v.count;
-  });
+  if (!features.length) return result;
+  const f = features[0]; // scope=set 단일
+  for (let i = 1; i <= 30; i++) {
+    const key = `f${i}`;
+    const val = f[key];
+    if (val === null || val === undefined) continue;
+    const num = Number(val);
+    result[i] = num;
+  }
   return result;
 }
 
@@ -102,11 +97,9 @@ function computeGroupScores(featureScores: Record<number, number>) {
   (Object.keys(GROUPS) as GroupKey[]).forEach((g) => {
     const vals = GROUPS[g]
       .map((fid) => {
-        let v = featureScores[fid];
+        const v = featureScores[fid];
         if (v === undefined) return null;
-        // 위험도 정규화: reverse는 1 - v
-        if (REVERSE_FEATURES.has(fid)) v = 1 - v;
-        return v;
+        return v; // 이미 집계 시 역변환 완료
       })
       .filter((v) => v !== null) as number[];
     groupScores[g] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;

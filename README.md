@@ -48,21 +48,26 @@ OPENAI_ASSISTANT_ID_MATH_GRADE3="asst_8uAWFfo3EMhfUR70BOCjlHZK"
 OPENAI_ASSISTANT_ID_FEATURE_EXTRACT="asst_whLY3QzwziYiSJFSsq1llxxd"
 OPENAI_ASSISTANT_ID_REPORT="asst_s3jApryjNZxkwyE8HyfGurqa"
 ```
-> 위치: 리포지토리 **루트**에 `.env` 파일을 두세요. DB는 미리 생성되어 있어야 합니다.
+> 위치: 리포지토리 **루트** 디렉토리에 `.env` 파일을 두세요. DB는 미리 생성되어 있어야 합니다.
 
 ## 6) 설치 및 실행
+
+Node.js 18+ (권장 20) 설치
+
 프론트/백엔드 각각 의존성 설치 후, 터미널 2개에서 실행하세요.
 ```bash
 # 터미널 1 (프론트)
 cd frontend
 npm install
-python -m venv .venv && . .venv/bin/activate   # Win: .venv\Scripts\activate
+python -m venv .venv
+.venv/bin/activate   # Window: .venv\Scripts\activate
 npm run dev   # http://localhost:3000
 
 # 터미널 2 (백엔드)
 cd backend
 npm install
-python -m venv .venv && . .venv/bin/activate   # Win: .venv\Scripts\activate
+python -m venv .venv
+.venv/bin/activate   # Window: .venv\Scripts\activate
 npm run dev   # 기본 4000
 ```
 헬스체크: http://localhost:4000/api/health

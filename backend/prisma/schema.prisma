@@ -14,6 +14,11 @@ enum SolveResult {
   gave_up
 }
 
+enum FeatureScope {
+  attempt
+  set
+}
+
 model User {
   id           String         @id @default(cuid())
   name         String?
@@ -128,9 +133,10 @@ model SolveStep {
 model ProblemFeature {
   id             String      @id @default(cuid())
   userId         String      @map("user_id")
-  problemId      String      @map("problem_id")
+  problemId      String?     @map("problem_id")
   problemSetId   String      @map("problem_set_id")
-  solveAttemptId String      @map("solve_attempt_id")
+  solveAttemptId String?     @map("solve_attempt_id")
+  scope          FeatureScope @default(attempt)
   f1             Float?
   f2             Float?
   f3             Float?
@@ -164,10 +170,10 @@ model ProblemFeature {
   modelVersion   String       @map("model_version")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
-  solveAttempt   SolveAttempt @relation(fields: [solveAttemptId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
-  problem        Problem      @relation(fields: [problemId], references: [id])
-  problemSet     ProblemSet   @relation(fields: [problemSetId], references: [id])
+  solveAttempt   SolveAttempt? @relation(fields: [solveAttemptId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  problem        Problem?      @relation(fields: [problemId], references: [id])
+  problemSet     ProblemSet    @relation(fields: [problemSetId], references: [id])
 
   @@index([userId])
   @@index([problemId])
