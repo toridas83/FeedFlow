@@ -10,7 +10,13 @@ const app = express();
 
 // Simple request logger
 app.use((req, _res, next) => {
-  console.log(`[req] ${req.method} ${req.path}`);
+  const noisy =
+    req.path.startsWith('/api/attempts') ||
+    req.path.startsWith('/api/analysis/attempts') ||
+    req.path.startsWith('/api/feature/problem-set');
+  if (!noisy) {
+    console.log(`[req] ${req.method} ${req.path}`);
+  }
   next();
 });
 

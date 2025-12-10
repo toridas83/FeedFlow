@@ -64,7 +64,8 @@ export const ProblemSolver: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
+  const [typingIntensity, setTypingIntensity] = useState(0); // 0~1: 입력 속도 기반 즉각 반응 효과
+
   // Steps State
   const [steps, setSteps] = useState<Array<SolutionStep & { createdAt: string; updatedAt: string }>>([
     { id: '1', content: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
@@ -82,6 +83,7 @@ export const ProblemSolver: React.FC = () => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const startTimeRef = useRef<number>(Date.now());
   const initializedRef = useRef<boolean>(false);
+  const keyTimesRef = useRef<number[]>([]);
 
   // Derived state for the active step content
   const activeStep = steps.find(s => s.id === focusedStepId);
@@ -232,6 +234,28 @@ export const ProblemSolver: React.FC = () => {
       updateStepContent(focusedStepId, e.target.value);
     }
   };
+
+  const handleTypingPing = () => {
+    const now = Date.now();
+    const windowMs = 3000;
+    keyTimesRef.current = keyTimesRef.current.filter((t) => now - t < windowMs);
+    keyTimesRef.current.push(now);
+    const ratePerSec = keyTimesRef.current.length / (windowMs / 1000);
+    const target = Math.min(1.5, ratePerSec / 2.5); // 최대치를 더 높이고, 더 빠르게 반응
+    setTypingIntensity((prev) => {
+      // 간단한 저역 통과 필터로 부드럽게 변화
+      const alpha = 0.35;
+      return prev * (1 - alpha) + target * alpha;
+    });
+  };
+
+  // 자연스러운 감쇠 효과
+  useEffect(() => {
+    const decay = setInterval(() => {
+      setTypingIntensity((prev) => Math.max(0, prev - 0.05));
+    }, 200);
+    return () => clearInterval(decay);
+  }, []);
 
   const handleFocusIn = () => {
     if (isFocused) return;
@@ -459,7 +483,20 @@ export const ProblemSolver: React.FC = () => {
   if (!problem) return <div className="p-8 text-center">문제가 아직 생성되지 않았습니다. 회원가입 이후 생성된 문제 세트가 필요합니다.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div
+      className="min-h-screen flex flex-col transition-[box-shadow,border-color,background-image,background-color] duration-300 ease-out"
+      style={{
+        boxShadow: `0 0 ${90 + 280 * typingIntensity}px ${28 * typingIntensity}px rgba(76,29,149,${0.5 + 0.85 * typingIntensity})`,
+        border: `3px solid rgba(67,56,202,${0.55 + 0.7 * typingIntensity})`,
+        backgroundColor: `rgb(${236 + 32 * typingIntensity}, ${238 + 34 * typingIntensity}, ${248 + 22 * typingIntensity})`,
+        backgroundImage:
+          typingIntensity > 0
+            ? `radial-gradient(circle at 8% 12%, rgba(99,102,241,${0.32 * typingIntensity}) 0, transparent 62%),
+               radial-gradient(circle at 92% 88%, rgba(59,130,246,${0.3 * typingIntensity}) 0, transparent 64%),
+               linear-gradient(135deg, rgba(88,28,135,${0.26 * typingIntensity}), rgba(255,255,255,0))`
+            : 'none',
+      }}
+    >
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-20 shadow-sm">
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
@@ -680,6 +717,7 @@ export const ProblemSolver: React.FC = () => {
                                     ref={editorRef}
                                     value={activeStep.content}
                                     onChange={handleEditorChange}
+                                    onKeyDown={handleTypingPing}
                                     onFocus={handleFocusIn}
                                     onBlur={handleFocusOut}
                                     className="flex-grow w-full p-4 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono text-base leading-relaxed resize-none shadow-inner placeholder-gray-500"
