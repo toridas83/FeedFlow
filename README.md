@@ -280,9 +280,8 @@ erDiagram
 
 프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 아래의 환경 변수를 설정해야 합니다.
 
-Bash
-
-`# Database Configuration
+```mermaid
+# Database Configuration
 DATABASE_URL="mysql://<USER>:<PASSWORD>@<HOST>:<PORT>/feedflow"
 
 # OpenAI API Configuration
@@ -299,7 +298,8 @@ OPENAI_ASSISTANT_ID_REPORT="asst_..."
 PORT=4000
 NODE_ENV="development"
 DB_PUSH_ON_STARTUP=true
-DB_ACCEPT_DATA_LOSS=true`
+DB_ACCEPT_DATA_LOSS=true
+```
 
 ---
 
@@ -309,24 +309,24 @@ Node.js v18 이상(v20 권장) 환경에서 실행해야 합니다. 프론트엔
 
 ### 1. Frontend
 
-Bash
-
-`cd frontend
+```mermaid
+cd frontend
 npm install
 npm run dev
-# 접속: http://localhost:3000`
+# 접속: http://localhost:3000
+```
 
 ### 2. Backend
 
-Bash
-
-`cd backend
+```mermaid
+cd backend
 npm install
 # Python 가상환경 설정 (필요 시)
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 npm run dev
 # API 서버: http://localhost:4000
-# 헬스 체크: http://localhost:4000/api/health`
+# 헬스 체크: http://localhost:4000/api/health
+```
 
 ---
 
