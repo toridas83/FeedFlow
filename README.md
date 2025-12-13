@@ -7,16 +7,16 @@
 
 ---
 
-## 📑 목차 (Table of Contents)
+## 📑 목차
 
-1. [주요 특징](https://www.google.com/search?q=%23-%EC%A3%BC%EC%9A%94-%ED%8A%B9%EC%A7%95-key-features)
-2. [시스템 아키텍처](https://www.google.com/search?q=%23-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-system-architecture)
-3. [기술 스택](https://www.google.com/search?q=%23-%EA%B8%B0%EC%88%A0-%EC%8A%A4%ED%83%9D-tech-stack)
-4. [핵심 기능](https://www.google.com/search?q=%23-%ED%95%B5%EC%8B%AC-%EA%B8%B0%EB%8A%A5-core-functions)
-5. [데이터베이스 구조](https://www.google.com/search?q=%23-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EA%B5%AC%EC%A1%B0-database-structure)
-6. [환경 설정](https://www.google.com/search?q=%23-%ED%99%98%EA%B2%BD-%EC%84%A4%EC%A0%95-configuration)
-7. [설치 및 실행](https://www.google.com/search?q=%23-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%8B%A4%ED%96%89-installation--run)
-8. [사용 가이드](https://www.google.com/search?q=%23-%EC%82%AC%EC%9A%A9-%EA%B0%80%EC%9D%B4%EB%93%9C-usage-guide)
+1. [주요 특징](#-✨-주요-특징)
+2. [시스템 아키텍처](#-🏗️-시스템-아키텍처)
+3. [기술 스택](#-🛠️-기술-스택)
+4. [핵심 기능](#-🧩-핵심-기능)
+5. [데이터베이스 구조](#-💾-데이터베이스-구조)
+6. [환경 설정](#-⚙️-환경-설정)
+7. [설치 및 실행](#-🚀-설치-및-실행)
+8. [사용 가이드](#-📖-사용-가이드)
 
 ---
 
